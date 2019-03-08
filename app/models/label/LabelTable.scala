@@ -774,6 +774,7 @@ object LabelTable {
     labelLocationList
   }
 
+
   /**
     * This method returns all the submitted labels with their severities included.
     *
@@ -785,14 +786,14 @@ object LabelTable {
     } yield (_labels.labelId, _labels.auditTaskId, _labels.gsvPanoramaId, _labelTypes.labelType, _labels.panoramaLat, _labels.panoramaLng)
 
     val _slabels = for {
-      (l, s) <- _labels.innerJoin(severities).on(_._1 === _.labelId)
-    } yield (l._1, l._2, l._3, l._4, s.severity)
+      (l, s) <- _labels.joinLeft(severities).on(_._1 === _.labelId)
+    } yield (l._1, l._2, l._3, l._4, s.severity.?)
 
     val _points = for {
-      (l, p) <- _slabels.innerJoin(labelPoints).on(_._1 === _.labelId)
-    } yield (l._1, l._2, l._3, l._4, l._5, p.lat.getOrElse(0.toFloat), p.lng.getOrElse(0.toFloat))
+      (l, p) <- _slabels.joinLeft(labelPoints).on(_._1 === _.labelId)
+    } yield (l._1, l._2, l._3, l._4, l._5.?, p.lat.getOrElse(0.toFloat).?, p.lng.getOrElse(0.toFloat).?)
 
-    val labelLocationList: List[LabelLocationWithSeverity] = _points.list.map(label => LabelLocationWithSeverity(label._1, label._2, label._3, label._4, label._5, label._6, label._7))
+    val labelLocationList: List[LabelLocationWithSeverity] = _points.list.map(label => LabelLocationWithSeverity(label._1, label._2, label._3, label._4, label._5.?, label._6.?, label._7.?))
     labelLocationList
   }
 
