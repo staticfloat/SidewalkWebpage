@@ -2,7 +2,7 @@
 
 db ?= sidewalk
 
-dev: | docker-up-db docker-run
+dev: docker-run
 
 docker-up:
 	@docker-compose up -d
@@ -17,8 +17,22 @@ docker-stop:
 docker-run:
 	@docker-compose run --rm --service-ports --name projectsidewalk-web web /bin/bash
 
+logs:
+	@docker-compose logs -f --tail=100
+
+destroy:
+	@echo -n "WARNING: This is going to wipe your database state clean, allowing it to re-initialize!  Hit CTRL-C if you don't want to do this..."
+	@for idx in $$(seq 1 6); do \
+		sleep 1; \
+		echo -n "."; \
+	done;
+	@echo
+	@docker-compose down -v
+
 ssh:
 	@docker exec -it projectsidewalk-$${target} /bin/bash
 
 import-dump:
 	@docker exec -it projectsidewalk-db sh -c "/opt/import-dump.sh $(db)"
+
+.PHONY: docker-run logs
