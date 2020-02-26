@@ -15,7 +15,10 @@ services:
     ports:
       - "9000:9000"
     environment:
+      # Tell our application how to connect to the db
       - DATABASE_URL=jdbc:postgresql://db:5432/sidewalk
+      - DATABASE_USER=sidewalk
+      - DATABASE_PASSWORD=sidewalk
 
   db:
     image: projectsidewalk/db
@@ -27,3 +30,8 @@ services:
       - "./db:/opt"
     ports:
       - "5432:5432"
+    environment:
+      # Default user/password; tell postgres to default to these users.
+      # If we don't give it at least one password, it will refuse to start.
+      - POSTGRESS_USER=sidewalk
+      - POSTGRES_PASSWORD=sidewalk
